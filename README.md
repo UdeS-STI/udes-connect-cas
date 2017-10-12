@@ -1,7 +1,4 @@
-[![Build Status](https://travis-ci.org/TencentWSRD/connect-cas2.svg?branch=master)](https://travis-ci.org/TencentWSRD/connect-cas2)
-[![Coverage Status](https://coveralls.io/repos/github/TencentWSRD/connect-cas2/badge.svg?branch=master)](https://coveralls.io/github/TencentWSRD/connect-cas2?branch=master)
-
-# connect-cas2
+# udes-connect-cas
 
 A complete implement of CAS Client middleware for Express/Connect, support CAS 2.0+ protocol.
 
@@ -11,7 +8,7 @@ We suppose you are already familiar with the CAS protocol, if not, please read t
 
 ## Install
 
-    npm install connect-cas2
+    npm install udes-connect-cas
 
 ## Feature
 
@@ -29,7 +26,7 @@ Notice:
 
 ```javascript
 var express = require('express');
-var ConnectCas = require('connect-cas2');
+var ConnectCas = require('udes-connect-cas');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
@@ -393,7 +390,7 @@ When you're using proxy-mode, you can use this method to get a PT to interacted 
 (Notice: if you're not in proxy-mode, calling this method it will directly call the callback and returns nothing.)
 
 `targetService` is the absolute back-end service path you want to interact with. You should know that which CAS client that your back-end service is using, this path should be their validate path.
-For example, if they're using connect-cas2 too, this should be their `${options.servicePrefix}${options.paths.validate}`.
+For example, if they're using udes-connect-cas too, this should be their `${options.servicePrefix}${options.paths.validate}`.
 
 `proxyOptions` {Object}        (Optional) Options.
 
@@ -421,9 +418,6 @@ Example:
      });
    });
 ```
-
-## CHANGE LOG
-[CHANGE LOG](https://github.com/TencentWSRD/connect-cas2/blob/master/CHANGELOG.md)
 
 ## More
 
