@@ -9,8 +9,6 @@ CAS(Central Authentication Service) is a single-sign-on / single-sign-off protoc
 
 We suppose you are already familiar with the CAS protocol, if not, please read this [document](https://github.com/apereo/cas/blob/master/cas-server-documentation/protocol/CAS-Protocol-Specification.md) before you use this.
 
-[中文文档](https://github.com/TencentWSRD/connect-cas2/blob/master/README.zh.md)
-
 ## Install
 
     npm install connect-cas2

@@ -41,8 +41,8 @@
     "optionalDependencies": {},
     "readme": "ERROR: No README data found!",
     "repository": {
-        "type": "",
-        "url": ""
+        "type": "git",
+        "url": "https://github.com/UdeS-STI/udes-connect-cas"
     },
     "scripts": {
         "start": "node ./example",
