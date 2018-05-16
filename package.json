@@ -4,6 +4,7 @@
     },
     "dependencies": {
         "co": "^4.6.0",
+        "debug": "3.1.0",
         "deprecate": "^0.1.0",
         "lodash": "^4.13.1",
         "query-string": "^4.1.0",
@@ -48,5 +49,5 @@
         "start": "node ./example",
         "test": "istanbul cover -x 'example/**' _mocha -- -R spec"
     },
-    "version": "1.0.4"
+    "version": "1.0.5"
 }
