@@ -323,41 +323,9 @@ Before CAS-invoked hook function, it will be called like `options.hooks.before(r
 #### options.hooks.after {Function}
 This hook function will be called when all logic that `casClient.core()` middleware is done, it will be called like a middleware: `options.hooks.after(req, res, next)`, so don't forget to call `next()`.
 
-#### options.logger {Function} (Optional)
-Customized logger factory function. Will be called like: `logger(req, type)`, `req` is the Response object, and the type is one of these log types: 'log', 'error', 'warn'.
-
-The logger factory should return a log function, for example: `options.logger = (req, type) => return console[type].bind(console[type])`
-
-In production environment, maybe you want to customize the format/content/output of the log by using log4js/winston and so on.
-
-In our cases, we also print the user information in each log for convenient to trace issues, that's why we pass `req` object to the factory function.
-
-Here's how we setup our production environment's log:
-
-```javascript
-app.use((req, res, next) => {
-  req.sn = uuid.v4();
-  function getLogger(type = 'log', ...args) {
-    let user = 'unknown';
-    try {
-      user = req.session.cas.user;
-    } catch(e) {}
-
-    return console[type].bind(console[type], `${req.sn}|${user}|${req.ip}|`, ...args);
-  }
-
-  req.getLogger = getLogger;
-});
-
-var casClient = new CasClient({
-  logger: (req, type) => {
-    return req.getLogger(type, '[CONNECT_CAS]: ');
-  }
-});
-
-app.use(casClient.core());
-
-```
+### DEBUG / LOGGING
+[Debug](https://www.npmjs.com/package/debug) module is integrated with a namespace "cas"
+So to activate CAS logging you must start your node instance with DEBUG=cas 
 
 ### METHOD
 
