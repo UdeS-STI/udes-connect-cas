@@ -12,6 +12,7 @@ var utils = require('./lib/utils');
 var clearRestletTGTs = require('./lib/clearRestletTGTs');
 var url = require('url');
 var deprecate = require('deprecate');
+var debug = require('debug')('cas');
 
 var DEFAULT_OPTIONS = {
   ignore: [],
@@ -83,13 +84,13 @@ function ConnectCas(options) {
   this.proxyCallbackPathName = (pgtURI.protocol && pgtURI.host) ? pgtURI.pathname : this.options.paths.proxyCallback;
 }
 
-ConnectCas.prototype.core = function() {
+ConnectCas.prototype.core = function () {
   var options = this.options;
   var that = this;
 
   if (options.hooks && typeof options.hooks.before === 'function') {
-    return function(req, res, next) {
-      options.hooks.before(req, res, function() {
+    return function (req, res, next) {
+      options.hooks.before(req, res, function () {
         coreMiddleware(req, res, next);
       });
     }
@@ -101,7 +102,6 @@ ConnectCas.prototype.core = function() {
     if (!req.sessionStore) throw new Error('You must setup a session store before you can use CAS client!');
     if (!req.session) throw new Error('Unexpected req.session ' + req.session);
 
-    var logger = utils.getLogger(req, options);
     var pathname = req.path;
     var method = req.method;
 
@@ -109,7 +109,7 @@ ConnectCas.prototype.core = function() {
 
     if (options.restletIntegration) {
       if (options.paths.restletIntegration) {
-        req.clearRestlet = clearRestletTGTs.bind(null, options, logger);
+        req.clearRestlet = clearRestletTGTs.bind(null, options);
 
         for (var i in options.restletIntegration) {
           if (options.restletIntegration[i] && typeof options.restletIntegration[i].trigger === 'function' && options.restletIntegration[i].trigger(req)) {
@@ -118,7 +118,7 @@ ConnectCas.prototype.core = function() {
           }
         }
       } else {
-        logger.warn("options.restletIntegration is set, but options.paths.restletIntegration is undefined! Maybe you forget to set all your paths.")
+        debug("options.restletIntegration is set, but options.paths.restletIntegration is undefined! Maybe you forget to set all your paths.")
       }
     }
 
@@ -136,7 +136,7 @@ ConnectCas.prototype.core = function() {
      * @param {Function}  callback
      * @returns {*}
      */
-    req.getProxyTicket = function(targetService, proxyOptions, callback) {
+    req.getProxyTicket = function (targetService, proxyOptions, callback) {
 
       if (typeof proxyOptions === 'function') {
         callback = proxyOptions;
@@ -155,17 +155,17 @@ ConnectCas.prototype.core = function() {
         var restletIntegrateParams;
         if (matchedRestletIntegrateRule) {
           if (typeof options.restletIntegration[matchedRestletIntegrateRule].params === 'function') {
-            logger.info('Match restlet integration rule and using aync manner, whitch using function to return `object`, to get restlet integration params: ', matchedRestletIntegrateRule);
+            debug('Match restlet integration rule and using aync manner, whitch using function to return `object`, to get restlet integration params: ', matchedRestletIntegrateRule);
             restletIntegrateParams = options.restletIntegration[matchedRestletIntegrateRule].params(req);
           } else {
-            logger.info('Match restlet integration rule and using default manner, whitch just directly return `object`, to get restlet integration params: ', matchedRestletIntegrateRule);
+            debug('Match restlet integration rule and using default manner, whitch just directly return `object`, to get restlet integration params: ', matchedRestletIntegrateRule);
             restletIntegrateParams = options.restletIntegration[matchedRestletIntegrateRule].params;
           }
         }
-        if(matchedRestletIntegrateRule) {
-          if(options.restletCache && options.restletCache.type === 'dcache') {
+        if (matchedRestletIntegrateRule) {
+          if (options.restletCache && options.restletCache.type === 'dcache') {
             if (!options.restletCache.cache) {
-              logger.warn('restletCache.cache is empty');
+              debug('restletCache.cache is empty');
             }
             getProxyTicketThroughRestletReqDcache.call(that, req, res, targetService, {
               name: matchedRestletIntegrateRule,
@@ -187,7 +187,7 @@ ConnectCas.prototype.core = function() {
           getProxyTicket.call(that, req, res, proxyOptions, callback);
         }
       } else {
-        logger.warn('options.paths.proxyCallback is not set, CAS is on non-proxy mode, you should not request a proxy ticket for non-proxy mode!');
+        debug('options.paths.proxyCallback is not set, CAS is on non-proxy mode, you should not request a proxy ticket for non-proxy mode!');
         // TODO: Should this throw an error?
         // new Error('options.paths.proxyCallback is not set, CAS is on non-proxy mode, you should not request a proxy ticket for non-proxy mode!'
         callback();
@@ -195,13 +195,13 @@ ConnectCas.prototype.core = function() {
     };
 
     if (matchedRestletIntegrateRule) {
-      logger.info('Match restlet integration rule: ', matchedRestletIntegrateRule);
-      return doNext(function(req, res, next) {
+      debug('Match restlet integration rule: ', matchedRestletIntegrateRule);
+      return doNext(function (req, res, next) {
         next();
       });
     }
 
-    if (utils.shouldIgnore(req, options)) return doNext(function(req, res, next) {
+    if (utils.shouldIgnore(req, options)) return doNext(function (req, res, next) {
       next();
     });
 
@@ -212,8 +212,7 @@ ConnectCas.prototype.core = function() {
         case that.proxyCallbackPathName:
           return proxyCallback(req, doNext, options);
       }
-    }
-    else if (method === 'POST' && pathname === options.paths.validate && options.slo) {
+    } else if (method === 'POST' && pathname === options.paths.validate && options.slo) {
       return slo(req, doNext, options);
     }
 
@@ -221,7 +220,7 @@ ConnectCas.prototype.core = function() {
 
     function doNext(callback) {
       if (options.hooks && typeof options.hooks.after === 'function') {
-        options.hooks.after(req, res, function() {
+        options.hooks.after(req, res, function () {
           callback(req, res, next);
         });
       } else {
@@ -231,10 +230,10 @@ ConnectCas.prototype.core = function() {
   }
 };
 
-ConnectCas.prototype.logout = function() {
+ConnectCas.prototype.logout = function () {
   var options = this.options;
 
-  return function(req, res) {
+  return function (req, res) {
     if (!req.session) {
       return res.redirect('/');
     }
@@ -252,7 +251,7 @@ ConnectCas.prototype.logout = function() {
   };
 };
 
-ConnectCas.prototype.getPath = function(name) {
+ConnectCas.prototype.getPath = function (name) {
   return utils.getPath(name, this.options);
 };
 
